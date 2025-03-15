@@ -2,7 +2,6 @@ package client
 
 import (
 	"fmt"
-	"log/slog"
 	"net/http"
 	"time"
 )
@@ -14,7 +13,7 @@ func new() *http.Client {
 }
 
 func MakeRequest(r *http.Request, origin string) (*http.Response, error) {
-	slog.Info("Request Received")
+	origin = fmt.Sprintf("%v%v", origin, r.URL)
 
 	req, err := http.NewRequestWithContext(r.Context(), r.Method, origin, nil)
 	if err != nil {
@@ -24,7 +23,6 @@ func MakeRequest(r *http.Request, origin string) (*http.Response, error) {
 	req.Header = r.Header
 	req.Body = r.Body
 
-	slog.Info("Response Sent")
 	client := new()
 	res, err := client.Do(req)
 	if err != nil {

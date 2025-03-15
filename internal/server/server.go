@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"time"
 
 	"github.com/hackermanpeter/caching-proxy/internal/client"
 )
@@ -22,12 +21,7 @@ func (h httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// set headers
-	headers := w.Header()
-	for key, value := range res.Header {
-		for _, v := range value {
-			headers.Set(key, v)
-		}
-	}
+	setHeaders(w, res)
 
 	// respond
 	data, err := io.ReadAll(res.Body)
@@ -39,19 +33,9 @@ func (h httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func Start(port int, origin string) {
-	addr := fmt.Sprintf(":%v", port)
+	s := buildServer(port, origin)
 
-	s := http.Server{
-		Addr:         addr,
-		ReadTimeout:  30 * time.Second,
-		WriteTimeout: 90 * time.Second,
-		IdleTimeout:  120 * time.Second,
-		Handler: httpHandler{
-			origin,
-		},
-	}
-
-	fmt.Printf("Listening on %v\n", addr)
+	fmt.Printf("Listening on %v\n", port)
 	err := s.ListenAndServe()
 	if err != nil {
 		if err != http.ErrServerClosed {

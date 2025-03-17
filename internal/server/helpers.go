@@ -1,9 +1,12 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/hackermanpeter/caching-proxy/internal/cache"
 )
 
 func buildServer(port int, origin string) (*http.Server, error) {
@@ -27,4 +30,13 @@ func setHeaders(w http.ResponseWriter, h http.Header) {
 			headers.Set(key, v)
 		}
 	}
+}
+
+func getHeaders(url string, fileData map[string][]byte) (http.Header, error) {
+	headerKey := cache.GetHeaderKey(url)
+	var headers http.Header
+	if err := json.Unmarshal(fileData[headerKey], &headers); err != nil {
+		return nil, err
+	}
+	return headers, nil
 }

@@ -12,7 +12,7 @@ type Cache struct {
 	C *os.File
 }
 
-func Default() (*Cache, error) {
+func Connect() (*Cache, error) {
 	f, err := os.OpenFile("tmp.txt", os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
 		return nil, err
@@ -50,11 +50,11 @@ func (c *Cache) Update(dataPtr *map[string][]byte, url string, res *http.Respons
 	// retrieve headers
 	headers := res.Header
 
-	headersKey := fmt.Sprintf("%v-[headers]", url)
-	bodyKey := fmt.Sprintf("%v-[body]", url)
+	c.updateBody(dataPtr, GetBodyKey(url), data)
 
-	c.updateBody(dataPtr, bodyKey, data)
-	c.updateHeaders(dataPtr, headersKey, headers)
+	if err := c.updateHeaders(dataPtr, GetHeaderKey(url), headers); err != nil {
+		return nil, err
+	}
 
 	// write data to file
 	rawFileData, err := json.Marshal(*dataPtr)
@@ -69,4 +69,12 @@ func (c *Cache) Update(dataPtr *map[string][]byte, url string, res *http.Respons
 	c.C.Sync()
 
 	return data, nil
+}
+
+func GetBodyKey(url string) string {
+	return fmt.Sprintf("BODY_FOR_{%v}", url)
+}
+
+func GetHeaderKey(url string) string {
+	return fmt.Sprintf("HEADERS_FOR_{%v}", url)
 }

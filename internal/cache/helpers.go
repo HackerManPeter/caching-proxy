@@ -18,8 +18,6 @@ func (c *Cache) updateHeaders(dataPtr *map[string][]byte, key string, headers ht
 	// assign headers to map key
 	data[key] = value
 
-	// convert map to by
-
 	return nil
 
 }

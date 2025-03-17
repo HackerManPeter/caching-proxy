@@ -1,7 +1,6 @@
 package server
 
 import (
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -17,11 +16,12 @@ type httpHandler struct {
 
 func (h httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// open file
-	c, err := cache.Default()
+	c, err := cache.Connect()
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		return
 	}
+	defer c.C.Close()
 
 	cacheDataPtr, err := c.Read()
 	if err != nil {
@@ -33,16 +33,18 @@ func (h httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// check if request is in cache
 	url := fmt.Sprintf("%v%v", h.origin, r.URL)
-	bodyKey := fmt.Sprintf("%v-[body]", url)
-	if fileData[bodyKey] != nil {
-		// if request is there return request
 
-		headerKey := fmt.Sprintf("%v-[headers]", url)
-		var headers http.Header
-		json.Unmarshal(fileData[headerKey], &headers)
+	// if request is there return request
+	bodyKey := cache.GetBodyKey(url)
+
+	if fileData[bodyKey] != nil {
+		headers, err := getHeaders(url, fileData)
+		if err != nil {
+			fmt.Printf("%v", err)
+			return
+		}
 
 		setHeaders(w, headers)
-
 		w.Write(fileData[bodyKey])
 		slog.Info("X-CACHE: HIT")
 		return
@@ -64,6 +66,8 @@ func (h httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// set headers
 	headers := res.Header
 	setHeaders(w, headers)
+
+	w.WriteHeader(res.StatusCode)
 
 	// respond
 	w.Write(data)

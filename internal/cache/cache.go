@@ -8,19 +8,26 @@ import (
 	"os"
 )
 
+const FILE_NAME string = "tmp.txt"
+
 type Cache struct {
 	C *os.File
 }
 
 func Connect() (*Cache, error) {
-	f, err := os.OpenFile("tmp.txt", os.O_CREATE|os.O_RDWR, 0644)
+	C, err := os.OpenFile(FILE_NAME, os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Cache{
-		f,
+		C,
 	}, nil
+
+}
+
+func Empty() {
+	os.Remove(FILE_NAME)
 
 }
 

@@ -21,14 +21,14 @@ A lightweight Go CLI tool that starts a caching proxy server to forward requests
 ### Option 1: Install using Go
 
 ```bash
-go install github.com/yourusername/caching-proxy@latest
+go install github.com/HackerManPeter/caching-proxy@latest
 ```
 
 ### Option 2: Build from source
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/caching-proxy.git
+git clone https://github.com/HackerManPeter/caching-proxy.git
 
 # Navigate to the project directory
 cd caching-proxy

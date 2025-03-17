@@ -12,10 +12,8 @@ func new() *http.Client {
 	}
 }
 
-func MakeRequest(r *http.Request, origin string) (*http.Response, error) {
-	origin = fmt.Sprintf("%v%v", origin, r.URL)
-
-	req, err := http.NewRequestWithContext(r.Context(), r.Method, origin, nil)
+func MakeRequest(r *http.Request, url string) (*http.Response, error) {
+	req, err := http.NewRequestWithContext(r.Context(), r.Method, url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("unable to form request: %v", err)
 	}
